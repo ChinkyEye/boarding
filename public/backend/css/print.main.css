@@ -1,0 +1,58 @@
+@media print{
+	.print-0{
+		display: none !important;
+	}
+  .print-1{
+    display: contents !important;
+  }
+  
+    .table-responsive, .print-header{
+      /*font-size: 20px;*/
+      /*transform: scale(1,1);*/
+      max-width: 100% !important;
+      /*display: block !important;*/
+    }
+    .th-sticky-top th {
+    	color: #000;
+	    position: static !important;
+	    top: 0px;
+	    /*box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);*/
+	    background-color: #fff !important;
+	    z-index: 0;
+  	}
+    .bg-dark{
+    	background-color: red;
+    }
+    .heading{
+        margin: 0;
+        padding: 0;
+    }
+
+    table{
+      /*width: 135vw !important;*/
+    }
+
+    .table td {
+      /*padding: 1px !important;*/
+    }
+    .table th {
+    	/*border: 1px solid #000;*/
+      /*padding: 2px 3px !important;*/
+    }
+
+    @page {
+    }
+    /* Or: */
+    @page :left {
+      /*margin: 1cm;*/
+    }
+
+    @page :right {
+      /*margin: 4cm;*/
+    }
+
+    /* The first page of a print can be manipulated as well */
+    @page :first {
+      /*margin: 1cm 2cm;*/
+    }
+}
