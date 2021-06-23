@@ -119,7 +119,17 @@ class StudentController extends Controller
     $idcardShift = $request->idcardShift;
     $idcardClass = $request->idcardClass;
     $idcardSection = $request->idcardSection;
+    // $idcardBatch = $request->idcardBatch;
+    
+    // $students = UserHasBatch::whereHas('getStudentBatch', function(Builder $query){
+    //   $query->where('school_id', Auth::user()->school_id)
+    //         ->where('is_active','1')
+    //         ->orderBy('id','desc');
+    // })->where('batch_id',$idcardBatch)
+    //   ->get();
+
     $students = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id);
+
     if(!empty($idcardShift)){
       $students = $students->where('shift_id',$idcardShift);
     }
@@ -129,7 +139,9 @@ class StudentController extends Controller
     if(!empty($idcardSection)){
       $students = $students->where('section_id',$idcardSection);
     }
+
     $students = $students->get();
+    // dd($students);
     $current_date = date('Y-m-d');
     return view('backend.primaryentry.student.allcertificate',compact('students','current_date'));
 

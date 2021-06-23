@@ -41,6 +41,7 @@
           <input type="hidden" id="idcardShift" name="idcardShift">
           <input type="hidden" id="idcardClass" name="idcardClass">
           <input type="hidden" id="idcardSection" name="idcardSection">
+          <input type="hidden" id="idcardBatch" name="idcardBatch">
           <input type="submit" name="submit" value="Certificate" class="btn btn-sm btn-info">
         </form>
         {{-- <a href="{{route('admin.student.upgrade')}}" class="btn btn-sm btn-info text-capitalize">upgrade batch</a> --}}
@@ -166,11 +167,12 @@
       $('#idcardSection').val(section_id);
   });
 </script>
-{{-- <script type="text/javascript">
+<script type="text/javascript">
   $("body").on("change","#batch_data", function(event){
-    $.("#batch_id").val()
+    var batch_id = $('#batch_data').val();
+    $("#idcardBatch").val(batch_id);
   });
-</script> --}}
+</script>
 <script type="text/javascript">
   $(document).ready(function(){
     fill_datatable();
