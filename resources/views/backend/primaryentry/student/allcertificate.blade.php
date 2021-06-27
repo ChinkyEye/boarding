@@ -16,12 +16,6 @@
     <div class="row mb-2">
       <div class="col-sm-6">
         <button class="btn btn-xs btn-info rounded-0" onclick="PrintDiv('printTable')">Print me</button>
-        {{-- <form action="{{route('admin.student.count')}}" method="POST" class="d-inline-block">
-          {{ csrf_field() }}
-          <input type="hidden" name="category" id="category"  value="certificate">
-          <input type="submit" name="submit" value="Print" class="btn btn-info" onclick='idCardCount()'>
-        </form> --}}
-        {{-- <span>This Student has Printed Idcard 0 times</span> --}}
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
@@ -44,7 +38,6 @@
       		</div>
       		<h3 class="text-center text-uppercase">{{$student->getSchool->school_name}}</h3>
       		<h5 class="text-center">{{$student->getSchool->address}} , Morang (Nepal)</h5>
-      		{{-- <img src="{{URL::to('/')}}/images/main/{{$student->getSchool->slug}}/{{$student->getSchool->image}}" class="img-fluid mx-auto" style="width: 200px"> --}}
       		<div class="text-center">
       			<img src="{{URL::to('/')}}/backend/images/school.png" class="img-fluid mx-auto" style="width: 200px">
       		</div>
@@ -69,21 +62,6 @@
       					<div class="form-group col">
       						<label class="form-label" style="font-family: monospace;">Principal:</label>
       					</div>
-      					{{-- <div class="col-md-5" style="display:inline;">
-      						<div class="form-group">
-      							<label class="form-label" style="font-family: monospace;">Date of Issue:- {{$current_date}}</label>
-      						</div>
-      					</div>
-      					<div class="col-md-4" style="display:inline;">
-      						<div class="form-group">
-      							<label class="form-label" style="font-family: monospace;">Prepared By:</label>
-      						</div>
-      					</div>
-      					<div class="col-md-3" style="display:inline;">
-      						<div class="form-group">
-      							<label class="form-label" style="font-family: monospace;">Principal:</label>
-      						</div>
-      					</div> --}}
       				</div>
       			</div>
       		</div>
