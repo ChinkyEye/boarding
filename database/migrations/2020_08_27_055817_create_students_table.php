@@ -40,8 +40,6 @@ class CreateStudentsTable extends Migration
             $table->boolean('is_active')->default(1);
             $table->unsignedBigInteger('school_id');
             $table->foreign('school_id')->references('id')->on('settings');
-            $table->unsignedBigInteger('batch_id');
-            $table->foreign('batch_id')->references('id')->on('batches');
             $table->unsignedBigInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users');
             $table->integer('updated_by')->nullable();

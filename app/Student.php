@@ -9,7 +9,7 @@ use Carbon\Carbon;
 class Student extends Model
 {
 	protected $fillable = [
-        'slug','roll_no','class_id','section_id','shift_id','gender','dob','register_id','register_date','image','student_code','document_name','document_photo','created_by','updated_by','created_at_np','user_type','user_id','phone_no','address','actual_roll_no','school_id','batch_id'
+        'slug','roll_no','class_id','section_id','shift_id','gender','dob','register_id','register_date','image','student_code','document_name','document_photo','created_by','updated_by','created_at_np','user_type','user_id','phone_no','address','actual_roll_no','school_id'
     ];
     
 

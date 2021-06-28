@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Teacher extends Model
 {
     protected $fillable = [
-        'slug','created_by','updated_by','sort_id','designation','uppertype','t_designation','training','qualification','dob','phone','address','gender','religion','nationality_id','marital_status','j_date','p_date','image','government_id','insurance_id','pan_id','cinvestment_id','pfund_id','teacher_code','created_at_np','user_id','school_id','batch_id'
+        'slug','created_by','updated_by','sort_id','designation','uppertype','t_designation','training','qualification','dob','phone','address','gender','religion','nationality_id','marital_status','j_date','p_date','image','government_id','insurance_id','pan_id','cinvestment_id','pfund_id','teacher_code','created_at_np','user_id','school_id'
     ];
 
     public function getTeacherPeriod()
