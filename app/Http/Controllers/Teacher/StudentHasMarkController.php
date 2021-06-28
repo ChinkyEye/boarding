@@ -51,9 +51,13 @@ class StudentHasMarkController extends Controller
     {
       $student_id = Student::where('slug',$slug)
                             ->where('school_id', Auth::user()->school_id)
-                            ->where('batch_id', Auth::user()->batch_id) 
+                            ->whereHas('getStudentViaBatch', function(Builder $query){
+                              $query->where('batch_id', Auth::user()->batch_id);
+                            })
+                            // ->where('batch_id', Auth::user()->batch_id) 
                             ->where('is_active', True)
                             ->value('id');
+
       $student_info = Student::with('getStudentUser')->find($student_id);
       $class_id = $student_info->class_id;
       $shift_id = $student_info->shift_id;
