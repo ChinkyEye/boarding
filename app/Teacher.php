@@ -139,4 +139,8 @@ class Teacher extends Model
     {
         return $this->hasOne('App\TeacherIncome','user_id','user_id');
     }
+
+    public function getTeacherFromBatch(){
+        return $this->belongsTo(UserHasBatch::class,'user_id','user_id');
+    }
 }

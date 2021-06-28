@@ -522,7 +522,7 @@ $().ready(function() {
 <script type="text/javascript">
 $(document).ready(function(){
   var currentDate = NepaliFunctions.ConvertDateFormat(NepaliFunctions.GetCurrentBsDate(), "YYYY-MM-DD");
-  $('#dob').val(currentDate);
+  $('#dob,#j_date').val(currentDate);
   $('#dob').nepaliDatePicker({
     ndpYear: true,
     ndpMonth: true,

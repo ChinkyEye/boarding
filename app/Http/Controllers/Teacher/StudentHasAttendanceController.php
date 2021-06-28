@@ -34,6 +34,7 @@ class StudentHasAttendanceController extends Controller
     }
 
     public function getStudentAttendance(Request $request){
+      // dd('kk');
       // var_dump($request->date_data, date('Y-m-d')); die();
       $shift = $request->shift_data;
       $sclass = $request->class_data;
@@ -65,8 +66,16 @@ class StudentHasAttendanceController extends Controller
           // var_dump($students);
         }
         else{
-          $students = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)
-                            ->orderBy('roll_no', 'Asc');
+          // $students = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)
+          //                   ->orderBy('roll_no', 'Asc');
+
+          $students = Student::whereHas('getStudentViaBatch', function(Builder $query){
+                        $query->where('batch_id', Auth::user()->batch_id);
+                       })
+                      ->where('school_id', Auth::user()->school_id)
+                      ->orderBy('roll_no', 'Asc');
+
+
           if(!empty($shift))
           {            
             $students = $students->where('shift_id', $shift);

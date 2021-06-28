@@ -67,13 +67,20 @@ class TeacherController extends Controller
                         // 8 =>'count',
       );
       $batch_data = $request->data['batch_data'];
-      // $totalData = Teacher::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->orderBy('id','desc')->count();
-      $totalData = UserHasBatch::whereHas('getTeacherBatch', function(Builder $query){
-        $query->where('school_id', Auth::user()->school_id)
-        ->where('is_active','1')
-        ->orderBy('id','desc');
-      })->where('batch_id',$batch_data)
-      ->count();
+      $totalData = Teacher::where('school_id', Auth::user()->school_id)
+                        ->whereHas('getTeacherFromBatch', function(Builder $query){
+                            $query->where('batch_id', Auth::user()->batch_id);
+                            })
+                        ->orderBy('id','desc')
+                        ->count();
+
+     
+      // $totalData = UserHasBatch::whereHas('getTeacherBatch', function(Builder $query){
+      //   $query->where('school_id', Auth::user()->school_id)
+      //   ->where('is_active','1')
+      //   ->orderBy('id','desc');
+      // })->where('batch_id',$batch_data)
+      // ->count();
       $totalFiltered = $totalData; 
       $limit = $request->input('length');
       $start = $request->input('start');
@@ -376,9 +383,12 @@ class TeacherController extends Controller
     {
       // dd($request->id);
       $teacher_info = Teacher::where('school_id', Auth::user()->school_id)
-                            ->where('batch_id', Auth::user()->batch_id)
+                            ->whereHas('getTeacherFromBatch', function(Builder $query){
+                             $query->where('batch_id', Auth::user()->batch_id);
+                              })
                             ->where('is_active', True)
                             ->find($request->id);
+                              
       return view('backend.primaryentry.teacher.card',compact('teacher_info'));
     }
 
@@ -511,7 +521,7 @@ class TeacherController extends Controller
        }
        $user_has_batches = UserHasBatch::create([
         'user_id' => $user->id,
-        'batch_id' => $teacher->batch_id,
+        'batch_id' => Auth::user()->batch_id,
         'created_by' => Auth::user()->id,
         'created_at_np' => date("Y-m-d")." ".date("H:i:s"),
 
@@ -545,7 +555,14 @@ class TeacherController extends Controller
      */
     public function edit($id)
     {
-        $teachers = Teacher::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->where('id', $id)->get();
+        // $teachers = Teacher::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->where('id', $id)->get();
+
+        $teachers = Teacher::whereHas('getTeacherFromBatch', function(Builder $query){
+          $query->where('batch_id', Auth::user()->batch_id);
+        })->where('school_id', Auth::user()->school_id)
+          ->where('id', $id)
+          ->get();
+
         $shifts = Shift::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->get();
         $teacherhasshifts = Teacher_has_shift::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->where('teacher_id',$id)->get();
         $nationalities  = Nationality::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->get();
