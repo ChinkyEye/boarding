@@ -15,6 +15,10 @@ class UserHasBatch extends Model
     public static function getBatch(Request $request){
         return Batch::all();
     }
+
+    public function Batch(){
+        return $this->belongsTo(Batch::class,'batch_id','id');
+    }
     
     public function getUser()
     {

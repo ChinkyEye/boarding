@@ -17,6 +17,8 @@ use Maatwebsite\Excel\Concerns\WithColumnWidth;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
+use Illuminate\Database\Eloquent\Builder;
+
 
 
 class StudentsExport implements FromQuery,WithStyles, WithHeadings, WithMapping,ShouldAutoSize,WithEvents
@@ -51,7 +53,11 @@ class StudentsExport implements FromQuery,WithStyles, WithHeadings, WithMapping,
 
      public function query()
      {
-        $student = Student::query()->where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id);
+        // $student = Student::query()->where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id);
+        $student = Student::whereHas('getStudentViaBatch', function(Builder $query){
+            $query->where('batch_id', Auth::user()->batch_id);
+        })->where('school_id', Auth::user()->school_id);
+
         if($this->shift != NULL){
           $student = $student->where('shift_id',$this->shift);
         }
@@ -70,7 +76,8 @@ class StudentsExport implements FromQuery,WithStyles, WithHeadings, WithMapping,
                 $student->id,
                 $student->getStudentUser->name." ".$student->getStudentUser->middle_name." ".$student->getStudentUser->last_name,
                 $student->student_code,
-                $student->getBatch->name,
+                // $student->getBatch->name,
+                $student->getStudentViaBatch->Batch->name,
                 $student->roll_no,
                 $student->getSection->name,
                 $student->getClass->name,

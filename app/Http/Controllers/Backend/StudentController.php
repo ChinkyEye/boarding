@@ -99,7 +99,13 @@ class StudentController extends Controller
     $idcardShift = $request->idcardShift;
     $idcardClass = $request->idcardClass;
     $idcardSection = $request->idcardSection;
-    $students = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id);
+
+    $students = Student::whereHas('getStudentViaBatch', function(Builder $query){
+      $query->where('batch_id', Auth::user()->batch_id);
+    })->where('school_id', Auth::user()->school_id);
+    // dd($studentss[0]->getStudentViaBatch);
+
+    // $students = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id);
 
     if(!empty($idcardShift)){
       $students = $students->where('shift_id',$idcardShift);
@@ -111,7 +117,6 @@ class StudentController extends Controller
       $students = $students->where('section_id',$idcardSection);
     }
     $students = $students->get();
-    // dd($students);
     return view('backend.primaryentry.student.idcard',compact('students'));
   }
 
@@ -120,22 +125,29 @@ class StudentController extends Controller
     $idcardClass = $request->idcardClass;
     $idcardSection = $request->idcardSection;
     $idcardBatch = $request->idcardBatch;
+    // dd($idcardBatch);
     if(!empty($idcardBatch)){
-    $students = UserHasBatch::whereHas('getStudentBatch', function(Builder $query){
-      $query->where('school_id', Auth::user()->school_id)
-            ->where('is_active','1')
-            ->orderBy('id','desc');
-    })->where('batch_id',$idcardBatch)
-      ->get();
+      $students = Student::whereHas('getStudentViaBatch', function(Builder $query) use ($idcardBatch){
+        $query->where('batch_id', $idcardBatch);
+      })->where('school_id', Auth::user()->school_id);
+    }else{
+      $students = Student::whereHas('getStudentViaBatch', function(Builder $query){
+        $query->where('batch_id', Auth::user()->batch_id);
+      })->where('school_id', Auth::user()->school_id);
     }
-    else{
-      $students = UserHasBatch::whereHas('getStudentBatch', function(Builder $query){
-        $query->where('school_id', Auth::user()->school_id)
-        ->where('is_active','1')
-        ->orderBy('id','desc');
-      })->where('batch_id',Auth::user()->batch_id)
-      ->get();
+
+    if(!empty($idcardShift)){
+      $students = $students->where('shift_id',$idcardShift);
     }
+    if(!empty($idcardClass)){
+      $students = $students->where('class_id',$idcardClass);
+    }
+    if(!empty($idcardSection)){
+      $students = $students->where('section_id',$idcardSection);
+    }
+
+    $students = $students->get();
+    
 
     $current_date = date('Y-m-d');
     return view('backend.primaryentry.student.allcertificate',compact('students','current_date'));
@@ -149,7 +161,12 @@ class StudentController extends Controller
     $sections = Section::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->get();
     $nationalities = Nationality::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->get();
     $batchs = Batch::where('school_id', Auth::user()->school_id)->get();
-    $students = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->where('id', $request->id)->get();
+    // $students = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->where('id', $request->id)->get();
+    $students = Student::whereHas('getStudentViaBatch', function(Builder $query){
+      $query->where('batch_id', Auth::user()->batch_id);
+    })->where('school_id', Auth::user()->school_id)
+      ->where('id', $request->id)
+      ->get();
     return view('backend.primaryentry.student.detail', compact(['students','shifts','classes','sections','nationalities','batchs']));
   }
 
@@ -210,7 +227,13 @@ class StudentController extends Controller
   public function certificate(Request $request){
     $data_id = $request->id;
     $current_date = date('Y-m-d');
-    $students = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->withCount('Student_has_parent')->find($data_id);
+    $students = Student::whereHas('getStudentViaBatch', function(Builder $query){
+      $query->where('batch_id', Auth::user()->batch_id);
+    })->where('school_id', Auth::user()->school_id)
+      ->withCount('Student_has_parent')
+      ->find($data_id);
+
+    // $students = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->withCount('Student_has_parent')->find($data_id);
     // dd($students);
     return view('backend.primaryentry.student.certificate', compact('students','current_date'));
   }
@@ -309,8 +332,8 @@ class StudentController extends Controller
     if(empty($request->input('search.value')))
     {  
       $posts = UserHasBatch::whereHas('getStudentBatch', function(Builder $query){
-        $query->where('batch_id', Auth::user()->batch_id)
-        ->where('school_id', Auth::user()->school_id)
+        // $query->where('batch_id', Auth::user()->batch_id)
+        $query->where('school_id', Auth::user()->school_id)
         ->where('is_active','1')
         ->orderBy('id','desc');
       })->where('batch_id', Auth::user()->batch_id)
@@ -318,8 +341,8 @@ class StudentController extends Controller
 
       if(!empty($request->data['batch_data'])){
         $posts = UserHasBatch::whereHas('getStudentBatch', function(Builder $query){
-          $query->where('batch_id', Auth::user()->batch_id)
-          ->where('school_id', Auth::user()->school_id)
+          // $query->where('batch_id', Auth::user()->batch_id)
+          $query->where('school_id', Auth::user()->school_id)
           ->where('is_active','1')
           ->orderBy('id','desc');
         })->where('batch_id',$batch_data)
@@ -371,9 +394,11 @@ class StudentController extends Controller
       }
 
       $totalFiltered = UserHasBatch::whereHas('getStudentBatch', function(Builder $query){
-        $query->where('school_id', Auth::user()->school_id)->where('is_active','1')->orderBy('id','desc');
+        $query->where('school_id', Auth::user()->school_id)
+        ->where('is_active','1')
+        ->orderBy('id','desc');
       })->where('batch_id',$batch_data)
-      ->count();
+        ->count();
 
     }
     $posts = $posts->limit($limit) //school chutauna
@@ -405,7 +430,7 @@ class StudentController extends Controller
         ";
         $nestedData['action'] = "
         <div class='text-center'>
-        <a href='".route('admin.student.detail.print',$post->id)."' class='btn btn-xs btn-outline-info' target='_blank' data-toggle='tooltip' data-placement='top' title='Print Student Detail'><i class='fas fa-print'></i></a>
+        <a href='".route('admin.student.detail.print',$post->getStudentBatch->id)."' class='btn btn-xs btn-outline-info' target='_blank' data-toggle='tooltip' data-placement='top' title='Print Student Detail'><i class='fas fa-print'></i></a>
         <a href='".route('admin.student.print',$post->getStudentBatch->id)."' class='btn btn-xs btn-outline-info' data-toggle='tooltip' data-placement='top' title='Print Id Card'><i class='fas fa-address-card'></i></a>
         <a href='".route('admin.student.show',$post->getStudentBatch->id)."' class='btn btn-xs btn-outline-success' data-toggle='tooltip' data-placement='top' title='View Detail'><i class='fa fa-eye'></i></a>
         <a href='".route('admin.student.edit',$post->getStudentBatch->id)."' class='btn btn-xs btn-outline-info' data-toggle='tooltip' data-placement='top'title='Update'><i class='fas fa-edit'></i></a> 
@@ -463,7 +488,7 @@ class StudentController extends Controller
       // 'register_id' => 'required',
       'register_date' => 'required',
       'document_name' => 'required',
-      'doc_file' => 'required|mimes:jpg|max:1024',
+      'doc_file' => 'required|mimes:jpeg,jpg|max:1024',
       'image' => 'required|mimes:jpeg,jpg|max:1024',
       'nationality_id' => 'required',
       'contact_no' => 'required',
@@ -504,7 +529,7 @@ class StudentController extends Controller
       'batch_id' => Auth::user()->batch_id,
       'created_at_np' => date("Y-m-d")." ".date("H:i:s"),
     ]);
-    var_dump($user); die();
+    // var_dump($user); die();
     $student= Student::create([
       'user_id' => $user->id,
       'slug' => $request['slug'],
@@ -526,7 +551,7 @@ class StudentController extends Controller
       'document_name' => $request['document_name'],
       'document_photo' => $fileNameDoc,
       'school_id' => Auth::user()->school_id,
-      'batch_id' => Auth::user()->batch_id,
+      // 'batch_id' => Auth::user()->batch_id,
       'created_by' => Auth::user()->id,
       'created_at_np' => date("Y-m-d")." ".date("H:i:s"),
     ]);
@@ -553,7 +578,8 @@ class StudentController extends Controller
 
     $user_has_batches = UserHasBatch::create([
       'user_id' => $user->id,
-      'batch_id' => $student->batch_id,
+      // 'batch_id' => $student->batch_id,
+      'batch_id' => Auth::user()->batch_id,
       'created_by' => Auth::user()->id,
       'created_at_np' => date("Y-m-d")." ".date("H:i:s"),
 
@@ -732,7 +758,15 @@ class StudentController extends Controller
     $nationalities = Nationality::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->get();
     $batchs = Batch::get();
     // dd($batchs);
-     $students = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->withCount('Student_has_parent')->where('id', $id)->get();
+    $students = Student::whereHas('getStudentViaBatch', function(Builder $query){
+      $query->where('batch_id', Auth::user()->batch_id);
+    })->where('school_id', Auth::user()->school_id)
+      ->withCount('Student_has_parent')
+      ->where('id', $id)
+      ->get();
+
+     // $students = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->withCount('Student_has_parent')->where('id', $id)->get();
+
     $student_info = Student::find($id);
     // dd($student_info);
     return view('backend.primaryentry.student.edit', compact('students','shifts','classes','sections','nationalities','batchs','student_info'));

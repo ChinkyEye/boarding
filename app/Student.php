@@ -137,9 +137,9 @@ class Student extends Model
     	// return $this->belongsToMany(StudentHasMark::class)->using(Examhasclass::class);
     }
 
-    // public function getStudentViaBatch(){
-    // 	return $this->hasMany('App\UserHasBatch','user_id','user_id');
-    // }
+    public function getStudentViaBatch(){
+    	return $this->belongsTo(UserHasBatch::class,'user_id','user_id');
+    }
     
     
 
