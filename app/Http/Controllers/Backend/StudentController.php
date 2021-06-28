@@ -99,10 +99,16 @@ class StudentController extends Controller
     $idcardShift = $request->idcardShift;
     $idcardClass = $request->idcardClass;
     $idcardSection = $request->idcardSection;
-
-    $students = Student::whereHas('getStudentViaBatch', function(Builder $query){
-      $query->where('batch_id', Auth::user()->batch_id);
-    })->where('school_id', Auth::user()->school_id);
+    $idcardBatch = $request->idcardBatch;
+    if(!empty($idcardBatch)){
+      $students = Student::whereHas('getStudentViaBatch', function(Builder $query) use ($idcardBatch){
+        $query->where('batch_id', $idcardBatch);
+      })->where('school_id', Auth::user()->school_id);
+    }else{
+      $students = Student::whereHas('getStudentViaBatch', function(Builder $query){
+        $query->where('batch_id', Auth::user()->batch_id);
+      })->where('school_id', Auth::user()->school_id);
+    }
     // dd($studentss[0]->getStudentViaBatch);
 
     // $students = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id);

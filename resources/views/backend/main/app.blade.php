@@ -225,7 +225,6 @@
       sessionStorage.setItem("SelItem", selVal);
     });
   </script>
-
   @stack('javascript')
 </body>
 </html>

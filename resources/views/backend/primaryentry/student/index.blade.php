@@ -35,6 +35,7 @@
           <input type="hidden" id="idcardShift" name="idcardShift">
           <input type="hidden" id="idcardClass" name="idcardClass">
           <input type="hidden" id="idcardSection" name="idcardSection">
+          <input type="hidden" id="idcardBatch" name="idcardBatch">
           <input type="submit" name="submit" value="Idcard" class="btn btn-sm btn-info">
         </form>
         <form action="{{route('admin.student.allcertificate')}}" method="GET" class="d-inline-block">
