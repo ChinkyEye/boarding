@@ -120,13 +120,22 @@ class StudentController extends Controller
     $idcardClass = $request->idcardClass;
     $idcardSection = $request->idcardSection;
     $idcardBatch = $request->idcardBatch;
-    
+    if(!empty($idcardBatch)){
     $students = UserHasBatch::whereHas('getStudentBatch', function(Builder $query){
       $query->where('school_id', Auth::user()->school_id)
             ->where('is_active','1')
             ->orderBy('id','desc');
     })->where('batch_id',$idcardBatch)
       ->get();
+    }
+    else{
+      $students = UserHasBatch::whereHas('getStudentBatch', function(Builder $query){
+        $query->where('school_id', Auth::user()->school_id)
+        ->where('is_active','1')
+        ->orderBy('id','desc');
+      })->where('batch_id',Auth::user()->batch_id)
+      ->get();
+    }
 
     $current_date = date('Y-m-d');
     return view('backend.primaryentry.student.allcertificate',compact('students','current_date'));
