@@ -226,6 +226,9 @@ class StudentController extends Controller
 
   public function certificate(Request $request){
     $data_id = $request->id;
+    // $common_batch =$this->batchCheck($request)['batch'];
+    // dd($common_batch);
+    $idcardBatch = $request->idcardBatch;
     $current_date = date('Y-m-d');
     $students = Student::whereHas('getStudentViaBatch', function(Builder $query){
       $query->where('batch_id', Auth::user()->batch_id);
@@ -312,13 +315,12 @@ class StudentController extends Controller
       6 =>'action',
     );
     $batch_data = $request->data['batch_data'];
-    $totalData = UserHasBatch::whereHas('getStudentBatch', function(Builder $query){
-      $query->where('school_id', Auth::user()->school_id)
-      ->where('is_active','1')
-      ->orderBy('id','desc');
-    })->where('batch_id',$batch_data)
-    ->count();
-
+    $totalData = $students = Student::whereHas('getStudentViaBatch', function(Builder $query) use ($batch_data){
+      $query->where('batch_id', $batch_data);
+    })->where('school_id', Auth::user()->school_id)
+      ->where('is_active','1')->orderBy('id','desc')
+      ->count();;
+    // $totalData = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->where('is_active','1')->orderBy('id','desc')->count(); //school chutauna
     $totalFiltered = $totalData; 
     $limit = $request->input('length');
     $start = $request->input('start');
@@ -327,85 +329,63 @@ class StudentController extends Controller
     $shift_data = $request->data['shift_data'];
     $class_data = $request->data['class_data'];
     $section_data = $request->data['section_data'];
-    $batch_data = $request->data['batch_data'];
-    
+
     if(empty($request->input('search.value')))
     {  
-      $posts = UserHasBatch::whereHas('getStudentBatch', function(Builder $query){
-        // $query->where('batch_id', Auth::user()->batch_id)
-        $query->where('school_id', Auth::user()->school_id)
-        ->where('is_active','1')
-        ->orderBy('id','desc');
-      })->where('batch_id', Auth::user()->batch_id)
-      ->offset($start);
-
-      if(!empty($request->data['batch_data'])){
-        $posts = UserHasBatch::whereHas('getStudentBatch', function(Builder $query){
-          // $query->where('batch_id', Auth::user()->batch_id)
-          $query->where('school_id', Auth::user()->school_id)
-          ->where('is_active','1')
-          ->orderBy('id','desc');
-        })->where('batch_id',$batch_data)
-        ->offset($start);
-      }
+      $posts = Student::offset($start);
       if(!empty($request->data['shift_data'])){
-        $posts = $posts->whereHas('getStudentBatch', function($query) use ($shift_data){
-          $query->where('shift_id',$shift_data);
-        });
+        $posts = $posts->where('shift_id',$shift_data);
       }
       if(!empty($request->data['class_data'])){
-        $posts = $posts->whereHas('getStudentBatch', function($query) use ($class_data){
-          $query->where('class_id',$class_data);
-        });
+        $posts = $posts->where('class_id',$class_data);
       }
       if(!empty($request->data['section_data'])){
-        $posts = $posts->whereHas('getStudentBatch', function($query) use ($section_data){
-          $query->where('section_id',$section_data);
-        });
+        $posts = $posts->where('section_id',$section_data);
       }
     }
     else {
       $search = $request->input('search.value'); 
-
-      $posts = UserHasBatch::offset($start)
-      ->whereHas('getStudentUserBatch', function($query) use ($search){
+    // dd($search);
+      $posts = Student::offset($start)
+      ->whereHas('getStudentUser', function($query) use ($search){
         $query->where('name', 'LIKE', '%'.$search.'%')
         ->orWhere('middle_name','LIKE', '%'.$search.'%')
         ->orWhere('last_name','LIKE', '%'.$search.'%');
-      });
+      })
+      ->orWhere('phone_no', 'LIKE',"%{$search}%")
+      ->orWhere('student_code', 'LIKE',"%{$search}%");
 
       if(!empty($request->data['shift_data'])){
-        $posts = $posts->whereHas('getStudentBatch', function($query) use ($shift_data){
-          $query->where('shift_id',$shift_data);
-        });
+        $posts = $posts->where('shift_id',$shift_data);
       }
       if(!empty($request->data['class_data'])){
-        $posts = $posts->whereHas('getStudentBatch', function($query) use ($class_data){
-          $query->where('class_id',$class_data);
-        });
+        $posts = $posts->where('class_id',$class_data);
       }
       if(!empty($request->data['section_data'])){
-        $posts = $posts->whereHas('getStudentBatch', function($query) use ($section_data){
-          $query->where('section_id',$section_data);
-        });
+        $posts = $posts->where('section_id',$section_data);
       }
-      if(!empty($request->data['batch_data'])){
-        $posts = $posts->where('batch_id',$batch_data);
-      }
+    // $posts = $posts->whereHas('getTeacherPeriod', function (Builder $query) use ($class_data) {
+    //                 $query->where('class_id', $class_data);
+    //               });
 
-      $totalFiltered = UserHasBatch::whereHas('getStudentBatch', function(Builder $query){
-        $query->where('school_id', Auth::user()->school_id)
+      $totalFiltered =Student::whereHas('getStudentViaBatch', function(Builder $query) use ($batch_data){
+        $query->where('batch_id', $batch_data);
+      })->where('school_id', Auth::user()->school_id)
         ->where('is_active','1')
-        ->orderBy('id','desc');
-      })->where('batch_id',$batch_data)
-        ->count();
+
+      // $totalFiltered = Student::where('school_id',Auth::user()->school_id)->where('is_active','1')
+    // ->orWhere('phone_no', 'LIKE',"%{$search}%")
+    // ->orWhere('student_code', 'LIKE',"%{$search}%")
+      ->count();
 
     }
-    $posts = $posts->limit($limit) //school chutauna
-    ->orderBy($order,$dir)
-    ->get();
-      
-    $data = array();
+    $posts = $posts->with('getStudentUser')->whereHas('getStudentViaBatch', function(Builder $query) use ($batch_data){
+      $query->where('batch_id', $batch_data);
+    })->where('school_id', Auth::user()->school_id)->limit($limit) //school chutauna
+      ->orderBy($order,$dir)
+      ->get();
+
+      $data = array();
     if(!empty($posts))
     {
       foreach ($posts as $index=>$post)
@@ -420,28 +400,29 @@ class StudentController extends Controller
           $class_icon = 'fa-times cross-css'; 
         }
         $nestedData['id'] = $index+1;
-        $nestedData['first_name'] = $post->getStudentUserBatch->name." ".$post->getStudentUserBatch->middle_name." ".$post->getStudentUserBatch->last_name." "."(".$post->getStudentBatch->student_code.")";
-        $nestedData['info'] = $post->getStudentBatch->getShift->name." | ".$post->getStudentBatch->getClass->name." | ".$post->getStudentBatch->getSection->name;;
-        $nestedData['phone_no'] = $post->getStudentBatch->phone_no;
+        $nestedData['first_name'] = $post->getStudentUser->name." ".$post->getStudentUser->middle_name." ".$post->getStudentUser->last_name." "."(".$post->student_code.")";
+        $nestedData['info'] = $post->getShift->name." | ".$post->getClass->name." | ".$post->getSection->name;
+        $nestedData['phone_no'] = $post->phone_no;
         $nestedData['created_by'] = "<div class='text-center'>".$post->getUser->name."</div>";
-        $nestedData['status'] = "<a class='d-block text-center' href='".route('admin.student.active',$post->getStudentBatch->slug)."' data-toggle='tooltip' data-placement='top' title='".$attribute_title."'>
+        $nestedData['status'] = "
+        <a class='d-block text-center' href='".route('admin.student.active',$post->slug)."' data-toggle='tooltip' data-placement='top' title='".$attribute_title."'>
         <i class='fa ".$class_icon."'></i>
         </a>
         ";
         $nestedData['action'] = "
         <div class='text-center'>
-        <a href='".route('admin.student.detail.print',$post->getStudentBatch->id)."' class='btn btn-xs btn-outline-info' target='_blank' data-toggle='tooltip' data-placement='top' title='Print Student Detail'><i class='fas fa-print'></i></a>
-        <a href='".route('admin.student.print',$post->getStudentBatch->id)."' class='btn btn-xs btn-outline-info' data-toggle='tooltip' data-placement='top' title='Print Id Card'><i class='fas fa-address-card'></i></a>
-        <a href='".route('admin.student.show',$post->getStudentBatch->id)."' class='btn btn-xs btn-outline-success' data-toggle='tooltip' data-placement='top' title='View Detail'><i class='fa fa-eye'></i></a>
-        <a href='".route('admin.student.edit',$post->getStudentBatch->id)."' class='btn btn-xs btn-outline-info' data-toggle='tooltip' data-placement='top'title='Update'><i class='fas fa-edit'></i></a> 
+        <a href='".route('admin.student.detail.print',$post->id)."' class='btn btn-xs btn-outline-info' target='_blank' data-toggle='tooltip' data-placement='top' title='Print Student Detail'><i class='fas fa-print'></i></a>
+        <a href='".route('admin.student.print',$post->id)."' class='btn btn-xs btn-outline-info' data-toggle='tooltip' data-placement='top' title='Print Id Card'><i class='fas fa-address-card'></i></a>
+        <a href='".route('admin.student.show',$post->id)."' class='btn btn-xs btn-outline-success' data-toggle='tooltip' data-placement='top' title='View Detail'><i class='fa fa-eye'></i></a>
+        <a href='".route('admin.student.edit',$post->id)."' class='btn btn-xs btn-outline-info' data-toggle='tooltip' data-placement='top'title='Update'><i class='fas fa-edit'></i></a> 
 
-        <form action='javascript:void(0)' data_url=".route('admin.student.destroy',$post->getStudentBatch->id)."' method='post' class='d-inline-block' data-toggle='tooltip' data-placement='top' title='Permanent Delete' onclick='myFunction(this)'>
+        <form action='javascript:void(0)' data_url=".route('admin.student.destroy',$post->id)."' method='post' class='d-inline-block' data-toggle='tooltip' data-placement='top' title='Permanent Delete' onclick='myFunction(this)'>
         <input type='hidden' name='_token' value='".csrf_token()."'>
         <input name='_method' type='hidden' value='DELETE'>
         <button class='btn btn-xs btn-outline-danger' type='submit' ><i class='fa fa-trash'></i></button>
         </form>
-        <a href='".route('admin.student.resetPassword',$post->getStudentBatch->id)."' class='btn btn-xs btn-outline-info' data-toggle='tooltip' data-placement='top'title='Reset Password'><i class='fas fa-key'></i></a>
-        <a href='".route('admin.student.certificate',$post->getStudentBatch->id)."' class='btn btn-xs btn-outline-info' data-toggle='tooltip' data-placement='top'title='Certificate'><i class='fas fa-certificate'></i></a> 
+        <a href='".route('admin.student.resetPassword',$post->id)."' class='btn btn-xs btn-outline-info' data-toggle='tooltip' data-placement='top'title='Reset Password'><i class='fas fa-key'></i></a>
+        <a href='".route('admin.student.certificate',$post->id)."' class='btn btn-xs btn-outline-info' data-toggle='tooltip' data-placement='top'title='Certificate'><i class='fas fa-certificate'></i></a> 
         </div>
         ";
         $data[] = $nestedData;
