@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
 use App\Helper\Helper;
 use App\Teacher;
 use App\TeacherIncome;
@@ -30,8 +31,12 @@ class TeacherIncomeController extends Controller
 
     public function create()
     {
-        $teachers = Teacher::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)
-                        ->get();
+        $teachers = Teacher::where('school_id', Auth::user()->school_id)
+                              // ->where('batch_id', Auth::user()->batch_id)
+                              ->whereHas('getTeacherFromBatch', function(Builder $query){
+                                  $query->where('batch_id', Auth::user()->batch_id);
+                                  })
+                              ->get();
                         // dd($teachers);
         return view('backend.teacherincome.create', compact('teachers'));
     }

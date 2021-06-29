@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Database\Eloquent\Builder;
 use App\Helper\Helper;
 use Auth;
 use Validator;
@@ -68,7 +69,13 @@ class BillController extends Controller
 
     public function getStudentBillList(Request $request){
       $all_data = json_decode($request->parameters, true);
-      $datas = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->orderBy('id','ASC'); //change gareko
+      $datas = Student::where('school_id', Auth::user()->school_id)
+                          ->whereHas('getStudentViaBatch', function(Builder $query){
+                           $query->where('batch_id',Auth::user()->batch_id);
+                             })
+                          // ->where('batch_id', Auth::user()->batch_id)
+                          ->orderBy('id','ASC'); //change gareko
+                          // dd($datas);
       if($all_data['shift_id']){
         $datas =  $datas->where('shift_id', $all_data['shift_id']);
       }

@@ -81,7 +81,12 @@ class FeeController extends Controller
       }
 
       // for shift, class, section
-      $datas = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->orderBy('id','ASC'); 
+      $datas = Student::where('school_id', Auth::user()->school_id)
+                        ->whereHas('getStudentViaBatch', function(Builder $query){
+                           $query->where('batch_id',Auth::user()->batch_id);
+                          })
+               // ->where('batch_id', Auth::user()->batch_id)
+               ->orderBy('id','ASC'); 
       if($all_data['shift_id']){
         $datas =  $datas->where('shift_id', $all_data['shift_id']);
       }
