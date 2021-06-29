@@ -38,7 +38,10 @@ class TeacherReportController extends Controller
                         ->where('is_active', True)
                         ->get();
         $teachers_list = Teacher::where('school_id', Auth::user()->school_id)
-                                ->where('batch_id', Auth::user()->batch_id)
+                                ->whereHas('getTeacherFromBatch', function(Builder $query){
+                                    $query->where('batch_id', Auth::user()->batch_id);
+                                })
+                                // ->where('batch_id', Auth::user()->batch_id)
                                 ->with('getTeacherUser')
                                 ->with('getUser');
         $teachers = $teachers_list->paginate(50);
@@ -54,7 +57,10 @@ class TeacherReportController extends Controller
                         ->where('is_active', True)
                         ->get();
         $teachers_list = Teacher::where('school_id', Auth::user()->school_id)
-                                ->where('batch_id', Auth::user()->batch_id);
+                                ->whereHas('getTeacherFromBatch', function(Builder $query){
+                                    $query->where('batch_id', Auth::user()->batch_id);
+                                });
+                                // ->where('batch_id', Auth::user()->batch_id);
         if ($request->search_data) {
             $teachers_list = $teachers_list->where('teacher_code', $request->search_data);
         }

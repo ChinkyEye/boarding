@@ -23,7 +23,10 @@ class ClassSubjectsExport implements FromView, ShouldAutoSize,WithEvents
     public function view(): View
     {
         $teacherhasperiods = Teacher::where('school_id', Auth::user()->school_id)
-                            ->where('batch_id', Auth::user()->batch_id)
+                            ->whereHas('getTeacherFromBatch', function(Builder $query){
+                                $query->where('batch_id', Auth::user()->batch_id);
+                            })
+                            // ->where('batch_id', Auth::user()->batch_id)
                             ->orderBy('sort_id','DESC')
                             ->orderBy('created_at','DESC');  
         $teacherhasperiods = $teacherhasperiods->with('getClassCount')->get();                         

@@ -21,6 +21,9 @@ class ObservationController extends Controller
      */
     public function index()
     {
+        // $common_batch = $this->getAll($request)['batch_id'];
+        // $common_batch =$this->getAll($request)['batch_id'];
+        // dd($this->getAll($request));
         $observations = Observation::orderBy('id','DESC')->where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->paginate(15);
         return view('backend.examsection.observation.index',compact('observations'));
     }

@@ -15,6 +15,8 @@ use App\Exports\Report\Student\Attendance\AttendanceReportExport;
 use App\Exports\Report\Student\Attendance\AttendanceDetailReportExport;
 use App\Exports\Report\Student\AllReport\AllStudentReport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Database\Eloquent\Builder;
+
 
 class StudentReportController extends Controller
 {
@@ -26,7 +28,9 @@ class StudentReportController extends Controller
                         ->where('is_active', True)
                         ->get();
         $students_list = Student::where('school_id', Auth::user()->school_id)
-                                ->where('batch_id', Auth::user()->batch_id)
+                                ->whereHas('getStudentViaBatch', function(Builder $query){
+                                    $query->where('batch_id', Auth::user()->batch_id);
+                                })
                                 ->with('getStudentUser')
                                 ->with('Student_has_parent')
                                 ->withCount('Student_has_parent')
@@ -45,7 +49,9 @@ class StudentReportController extends Controller
                         ->where('is_active', True)
                         ->get();
         $students_list = Student::where('school_id', Auth::user()->school_id)
-                                ->where('batch_id', Auth::user()->batch_id);
+                                ->whereHas('getStudentViaBatch', function(Builder $query){
+                                    $query->where('batch_id', Auth::user()->batch_id);
+                                });
                                 // dd($request);
         if ($request->search_data) {
             $students_list = $students_list->where('student_code', $request->search_data);

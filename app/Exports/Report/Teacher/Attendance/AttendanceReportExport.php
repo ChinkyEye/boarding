@@ -31,7 +31,10 @@ class AttendanceReportExport implements FromView, ShouldAutoSize,WithEvents
         $date = $this->date;
         // dd($date);
         $attendances_list = Teacher::where('school_id', Auth::user()->school_id)
-                                 ->where('batch_id', Auth::user()->batch_id);
+                                    ->whereHas('getTeacherFromBatch', function(Builder $query){
+                                        $query->where('batch_id', Auth::user()->batch_id);
+                                    });
+                                    // ->where('batch_id', Auth::user()->batch_id);
                                                         
         if ($this->date != NULL) {
            $attendances_list = $attendances_list->with(['getTeacherAttendance' => function ($query) use ($date) {

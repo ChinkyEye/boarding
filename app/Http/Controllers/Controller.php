@@ -44,5 +44,11 @@ class Controller extends BaseController
         $batchs = Batch::all();
         return ['batch' => $batchs];
     }
+    // public function getAll(Request $request){
+    //     // url()->previos();
+    //     return $request['batch_id'];
+    //     // return ['batch_id' => $request['batch_id']];
+    // }
+
    
 }

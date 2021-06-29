@@ -43,7 +43,10 @@ class PDFExport implements FromQuery,
     {
         $user = Teacher::query()
                        ->where('school_id', Auth::user()->school_id)
-                       ->where('batch_id', Auth::user()->batch_id);
+                       ->whereHas('getTeacherFromBatch', function(Builder $query){
+                            $query->where('batch_id', Auth::user()->batch_id);
+                            });
+                       // ->where('batch_id', Auth::user()->batch_id);
         if(!empty($this->shift)){
             $shift = $this->shift;
             $user->whereHas('getShiftTeacherCountList', function (Builder $query) use ($shift){

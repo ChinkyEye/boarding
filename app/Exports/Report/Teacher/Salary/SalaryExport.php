@@ -32,7 +32,10 @@ class SalaryExport implements FromView, ShouldAutoSize,WithEvents
     {
         $nepali_month = $this->month;
         $teachers_list = Teacher::where('school_id', Auth::user()->school_id)
-                                  ->where('batch_id', Auth::user()->batch_id)
+                                ->whereHas('getTeacherFromBatch', function(Builder $query){
+                                    $query->where('batch_id', Auth::user()->batch_id);
+                                })
+                                  // ->where('batch_id', Auth::user()->batch_id)
                                   ->with(['getTeacherIncome' => function ($query) use ($nepali_month) {
                                          $query->where('school_id', Auth::user()->school_id)
                                                ->where('batch_id', Auth::user()->batch_id)

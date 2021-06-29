@@ -48,10 +48,7 @@ class StudentController extends Controller
 
   public function export(Request $request)
   {
-    $common_batch = $this->getAll($request);
-    dd($common_batch);
-    // $common_batch = $this->getAll($request)['batch_value'];
-    // $common_batch =$this->batchCheck($request)['batch'];
+    
     $excShift = $request->excShift;
     $excClass = $request->excClass;
     $excSection = $request->excSection;
@@ -330,7 +327,7 @@ class StudentController extends Controller
       $query->where('batch_id', $batch_data);
     })->where('school_id', Auth::user()->school_id)
       ->where('is_active','1')->orderBy('id','desc')
-      ->count();;
+      ->count();
     // $totalData = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->where('is_active','1')->orderBy('id','desc')->count(); //school chutauna
     $totalFiltered = $totalData; 
     $limit = $request->input('length');
@@ -340,10 +337,22 @@ class StudentController extends Controller
     $shift_data = $request->data['shift_data'];
     $class_data = $request->data['class_data'];
     $section_data = $request->data['section_data'];
+    $batch_data = $request->data['batch_data'];
 
     if(empty($request->input('search.value')))
     {  
-      $posts = Student::offset($start);
+      $posts = Student::whereHas('getStudentViaBatch', function(Builder $query){
+        $query->where('batch_id', Auth::user()->batch_id);
+      })->where('school_id', Auth::user()->school_id)
+        ->offset($start);
+
+      if(!empty($request->data['batch_data'])){
+        $posts = Student::whereHas('getStudentViaBatch', function(Builder $query) use ($batch_data){
+          $query->where('batch_id', $batch_data);
+        })->where('school_id', Auth::user()->school_id)
+          ->offset($start);
+      }
+
       if(!empty($request->data['shift_data'])){
         $posts = $posts->where('shift_id',$shift_data);
       }
@@ -362,7 +371,9 @@ class StudentController extends Controller
         $query->where('name', 'LIKE', '%'.$search.'%')
         ->orWhere('middle_name','LIKE', '%'.$search.'%')
         ->orWhere('last_name','LIKE', '%'.$search.'%');
-      })
+      })->whereHas('getStudentViaBatch', function(Builder $query) use ($batch_data){
+        $query->where('batch_id', $batch_data);
+      })->where('school_id', Auth::user()->school_id)
       ->orWhere('phone_no', 'LIKE',"%{$search}%")
       ->orWhere('student_code', 'LIKE',"%{$search}%");
 
@@ -390,9 +401,8 @@ class StudentController extends Controller
       ->count();
 
     }
-    $posts = $posts->with('getStudentUser')->whereHas('getStudentViaBatch', function(Builder $query) use ($batch_data){
-      $query->where('batch_id', $batch_data);
-    })->where('school_id', Auth::user()->school_id)->limit($limit) //school chutauna
+    $posts = $posts->with('getStudentUser')
+      ->limit($limit) //school chutauna
       ->orderBy($order,$dir)
       ->get();
 

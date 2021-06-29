@@ -34,7 +34,10 @@ class TeacherProfileExport implements FromView, ShouldAutoSize,WithHeadings,With
     public function view(): View
     {
         $teachers_list = Teacher::where('school_id', Auth::user()->school_id)
-                                ->where('batch_id', Auth::user()->batch_id);
+                                ->whereHas('getTeacherFromBatch', function(Builder $query){
+                                    $query->where('batch_id', Auth::user()->batch_id);
+                                });
+                                // ->where('batch_id', Auth::user()->batch_id);
         if($this->code != NULL){
           $teachers_list = $teachers_list->where('teacher_code',$this->code);
         }

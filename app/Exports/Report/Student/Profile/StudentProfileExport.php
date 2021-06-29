@@ -31,7 +31,10 @@ class StudentProfileExport implements FromView, ShouldAutoSize,WithEvents
    public function view(): View
    {
        $students_list = Student::where('school_id', Auth::user()->school_id)
-                               ->where('batch_id', Auth::user()->batch_id);
+                                 ->whereHas('getStudentViaBatch', function(Builder $query){
+                                    $query->where('batch_id', Auth::user()->batch_id);
+                                });
+                               // ->where('batch_id', Auth::user()->batch_id);
        // if($this->code != NULL){
        //   $teachers_list = $teachers_list->where('teacher_code',$this->code);
        // }
