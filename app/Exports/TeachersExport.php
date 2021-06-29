@@ -35,7 +35,12 @@ class TeachersExport implements FromQuery,WithStyles, WithHeadings, WithMapping,
 
      public function query()
      {
-        $teacher = Teacher::query()->where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id);
+        // $teacher = Teacher::query()->where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id);
+        
+        $teacher = Teacher::where('school_id', Auth::user()->school_id)->whereHas('getTeacherFromBatch', function(Builder $query){
+            $query->where('batch_id', Auth::user()->batch_id);
+        });
+
         if($this->shift != NULL){
             $shift_data = $this->shift;
             $teacher = $teacher->whereHas('getShiftTeacherManyList', function (Builder $query) use ($shift_data) {
