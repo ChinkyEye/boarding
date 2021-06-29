@@ -250,7 +250,42 @@ $(document).ready(function() {
     $("#data_save").prop('disabled', false);
   });
 </script>
-<script>
+ <script>
+  $("#subject_data").change(function() {
+    // alert('kk');
+    Pace.start();
+    var class_id = $('#class_data').val(),
+        shift_id = $('#shift_data').val(),
+        section_id = $('#section_data').val(),
+        teacher_id = $('#teacher_data').val(),
+        token = $('meta[name="csrf-token"]').attr('content');
+    $.ajax({
+      type:"POST",
+      dataType:"JSON",
+      url:"{{route('admin.getTeacherRoutineClassList')}}",
+      data:{
+        _token: token,
+        class_id: class_id,
+        shift_id: shift_id,
+        section_id: section_id,
+        teacher_id: teacher_id,
+      },
+      success: function(response){
+        if(response.data == 0){
+          $("#data_save").prop('disabled', false);
+        }else{
+          $("#data_save").prop('disabled', true);
+          toastr.error(response.msg);
+        }
+      },
+      error: function(event){
+        alert("Sorry");
+      }
+    });
+    Pace.stop();
+  });
+</script> 
+{{-- <script>
   $("body").on("change","#section_data", function(event){
     Pace.start();
     var class_id = $('#class_data').val(),
@@ -283,5 +318,5 @@ $(document).ready(function() {
     });
     Pace.stop();
   });
-</script>
+</script> --}}
 @endpush
