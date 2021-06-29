@@ -94,36 +94,50 @@ class TeacherController extends Controller
       if(empty($request->input('search.value')))
       {       
         // $posts = Teacher::offset($start);
-        $posts = UserHasBatch::whereHas('getTeacherBatch', function(Builder $query){
-          $query->where('batch_id', Auth::user()->batch_id)
-          ->where('school_id', Auth::user()->school_id)
-          ->where('is_active','1')
-          ->orderBy('id','desc');
-        })->where('batch_id', Auth::user()->batch_id)
-        ->offset($start);
+        // $posts = UserHasBatch::whereHas('getTeacherBatch', function(Builder $query){
+        //   $query->where('batch_id', Auth::user()->batch_id)
+        //   ->where('school_id', Auth::user()->school_id)
+        //   ->where('is_active','1')
+        //   ->orderBy('id','desc');
+        // })->where('batch_id', Auth::user()->batch_id)
+        // ->offset($start);
+
+        $posts = Teacher::where('school_id', Auth::user()->school_id)
+                          ->whereHas('getTeacherFromBatch', function(Builder $query){
+                              $query->where('batch_id', Auth::user()->batch_id);
+                              })
+                          ->orderBy('id','desc')
+                          ->offset($start);
 
         if(!empty($request->data['batch_data'])){
-          $posts = UserHasBatch::whereHas('getTeacherBatch', function(Builder $query){
-            $query->where('school_id', Auth::user()->school_id)
-            ->where('is_active','1')
-            ->orderBy('id','desc');
-          })->where('batch_id',$batch_data)
-          ->offset($start);
+          // $posts = UserHasBatch::whereHas('getTeacherBatch', function(Builder $query){
+          //   $query->where('school_id', Auth::user()->school_id)
+          //   ->where('is_active','1')
+          //   ->orderBy('id','desc');
+          // })->where('batch_id',$batch_data)
+          // ->offset($start);
+
+          $posts = Teacher::where('school_id', Auth::user()->school_id)
+                            ->whereHas('getTeacherFromBatch', function(Builder $query) use($batch_data){
+                                $query->where('batch_id', $batch_data);
+                                })
+                            ->orderBy('id','desc')
+                            ->offset($start);
         }
         $teachershifts = Teacher_has_shift::offset($start);
         if(!empty($request->data['shift_data'])){
           $shift_id = Shift::value('id');
-          $posts = $posts->whereHas('getTeacherUserBatchShift', function (Builder $query) use ($shift_data) {
+          $posts = $posts->whereHas('getShiftTeacherManyList', function (Builder $query) use ($shift_data) {
             $query->where('shift_id', $shift_data);
           });
         }
         if(!empty($request->data['class_data'])){
-          $posts = $posts->whereHas('getTeacherUserBatchPeriod', function (Builder $query) use ($class_data) {
+          $posts = $posts->whereHas('getTeacherPeriod', function (Builder $query) use ($class_data) {
             $query->where('class_id', $class_data);
           });
         }
         if(!empty($request->data['section_data'])){
-          $posts = $posts->whereHas('getTeacherUserBatchPeriod', function (Builder $query) use ($section_data) {
+          $posts = $posts->whereHas('getTeacherPeriod', function (Builder $query) use ($section_data) {
             $query->where('section_id', $section_data);
           });
         }
@@ -139,48 +153,64 @@ class TeacherController extends Controller
         //                         ->orWhere('last_name','LIKE', '%'.$search.'%')
         //                         ->orWhere('email','LIKE', '%'.$search.'%');
         //                });
-        $posts = UserHasBatch::offset($start)
-        ->whereHas('getTeacherUserBatch', function($query) use ($search){
+        $posts = Teacher::offset($start)
+        ->whereHas('getTeacherUser', function($query) use ($search){
           $query->where('name', 'LIKE', '%'.$search.'%')
           ->orWhere('middle_name','LIKE', '%'.$search.'%')
           ->orWhere('last_name','LIKE', '%'.$search.'%');
         });
         
         if(!empty($request->data['batch_data'])){
-          $posts = UserHasBatch::whereHas('getTeacherBatch', function(Builder $query){
-            $query->where('school_id', Auth::user()->school_id)
-            ->where('is_active','1')
-            ->orderBy('id','desc');
-          })->where('batch_id',$batch_data)
-          ->offset($start);
+          // $posts = UserHasBatch::whereHas('getTeacherBatch', function(Builder $query){
+          //   $query->where('school_id', Auth::user()->school_id)
+          //   ->where('is_active','1')
+          //   ->orderBy('id','desc');
+          // })->where('batch_id',$batch_data)
+          // ->offset($start);
+
+          $posts = Teacher::where('school_id', Auth::user()->school_id)
+                            ->whereHas('getTeacherFromBatch', function(Builder $query) use($batch_data){
+                                $query->where('batch_id', $batch_data);
+                                })
+                            ->orderBy('id','desc')
+                            ->offset($start);
         }
         if(!empty($request->data['shift_data'])){
-          $posts = $posts->whereHas('getTeacherUserBatchShift', function (Builder $query) use ($shift_data) {
+          $posts = $posts->whereHas('getShiftTeacherList', function (Builder $query) use ($shift_data) {
             $query->where('shift_id', $shift_data);
           });
         }
         if(!empty($request->data['class_data'])){
-          $posts = $posts->whereHas('getTeacherUserBatchPeriod', function (Builder $query) use ($class_data) {
+          $posts = $posts->whereHas('getTeacherPeriod', function (Builder $query) use ($class_data) {
             $query->where('class_id', $class_data);
           });
         }
         if(!empty($request->data['section_data'])){
-          $posts = $posts->whereHas('getTeacherUserBatchPeriod', function (Builder $query) use ($section_data) {
+          $posts = $posts->whereHas('getTeacherPeriod', function (Builder $query) use ($section_data) {
            $query->where('section_id', $section_data);
          });
         }
-        $totalFiltered = UserHasBatch::where('is_active','1')
+        $totalFiltered = Teacher::where('is_active','1')
                                 // ->where('f_name', 'LIKE',"%{$search}%")
                                 // ->orWhere('m_name', 'LIKE',"%{$search}%")
                                 // ->orWhere('l_name', 'LIKE',"%{$search}%")
         ->count();
       }
 
-      $posts = $posts->whereHas('getTeacherBatch', function(Builder $query){
-        $query->where('school_id', Auth::user()->school_id)->where('is_active','1')->orderBy('id','desc');
-      })->limit($limit)
-      ->orderBy($order,$dir)
-      ->get();
+      // $posts = $posts->whereHas('getTeacherUser', function(Builder $query){
+      //   $query->where('school_id', Auth::user()->school_id)->where('is_active','1')->orderBy('id','desc');
+      // })->limit($limit)
+      // ->orderBy($order,$dir)
+      // ->get();
+
+      $posts = $posts->with('getTeacherUser')->where('school_id', Auth::user()->school_id)
+                     ->whereHas('getTeacherFromBatch', function(Builder $query) use($batch_data){
+                                $query->where('batch_id', $batch_data);
+                                })
+                    ->limit($limit)
+                    ->orderBy($order,$dir)
+                    ->get();
+
                     // $posts = $posts->with('getTeacherUser')->where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)
                     // ->limit($limit)
                     // ->orderBy($order,$dir)
@@ -201,31 +231,31 @@ class TeacherController extends Controller
             $class_icon = 'fa-times cross-css'; 
           }
           $nestedData['id'] = $index+1;
-          $nestedData['f_name'] = $post->getTeacherUserBatch->name." ".$post->getTeacherUserBatch->middle_name." ".$post->getTeacherUserBatch->last_name." ";
-          $nestedData['email'] = $post->getTeacherUserBatch->email;
-          $nestedData['phone'] = $post->getTeacherBatch->phone;
+          $nestedData['f_name'] = $post->getTeacherUser->name." ".$post->getTeacherUser->middle_name." ".$post->getTeacherUser->last_name." ";
+          $nestedData['email'] = $post->getTeacherUser->email;
+          $nestedData['phone'] = $post->phone;
           $nestedData['created_by'] = "<div class='text-center'>".$post->getUser->name."</div>";
           $nestedData['status'] = "
-          <a class='d-block text-center' href='".route('admin.teacher.active',$post->getTeacherBatch->slug)."' data-toggle='tooltip' data-placement='top' title='".$attribute_title."'>
+          <a class='d-block text-center' href='".route('admin.teacher.active',$post->slug)."' data-toggle='tooltip' data-placement='top' title='".$attribute_title."'>
           <i class='fa ".$class_icon."'></i>
           </a>
           ";
           $nestedData['action'] = "
           <div class='text-center'>
-          <a  href='".route('admin.staffhasbank',$post->getTeacherBatch->slug)."' class='btn btn-xs btn-outline-info' data-toggle='tooltip' data-placement='top' title='Add Bank'>".$post->getTeacherBatch->getBank()->count()."<i class='fa fa-university'></i></a>
+          <a  href='".route('admin.staffhasbank',$post->slug)."' class='btn btn-xs btn-outline-info' data-toggle='tooltip' data-placement='top' title='Add Bank'>".$post->getBank()->count()."<i class='fa fa-university'></i></a>
 
-          <a  href='".route('admin.teacherhasperiod',$post->getTeacherBatch->slug)."' class='btn btn-xs btn-outline-info' data-toggle='tooltip' data-placement='top' title='Add Class'>".$post->getTeacherBatch->getTeacherPeriod()->count()."<i class='fa fa-plus'></i></a>
+          <a  href='".route('admin.teacherhasperiod',$post->slug)."' class='btn btn-xs btn-outline-info' data-toggle='tooltip' data-placement='top' title='Add Class'>".$post->getTeacherPeriod()->count()."<i class='fa fa-plus'></i></a>
 
-          <a href='".route('admin.teacher.show',$post->getTeacherBatch->id)."' class='btn btn-xs btn-outline-success' data-toggle='tooltip' data-placement='top' title='View Detail'><i class='fa fa-eye'></i></a>
-          <a href='".route('admin.teacher.edit',$post->getTeacherBatch->id)."' class='btn btn-xs btn-outline-info' data-toggle='tooltip' data-placement='top'title='Update'><i class='fas fa-edit'></i></a> 
+          <a href='".route('admin.teacher.show',$post->id)."' class='btn btn-xs btn-outline-success' data-toggle='tooltip' data-placement='top' title='View Detail'><i class='fa fa-eye'></i></a>
+          <a href='".route('admin.teacher.edit',$post->id)."' class='btn btn-xs btn-outline-info' data-toggle='tooltip' data-placement='top'title='Update'><i class='fas fa-edit'></i></a> 
           
-          <form action='javascript:void(0)' data_url='".route('admin.teacher.destroy',$post->getTeacherBatch->id)."' method='post' class='d-inline-block' data-toggle='tooltip' data-placement='top' title='Permanent Delete' onclick='myFunction(this)'>
+          <form action='javascript:void(0)' data_url='".route('admin.teacher.destroy',$post->id)."' method='post' class='d-inline-block' data-toggle='tooltip' data-placement='top' title='Permanent Delete' onclick='myFunction(this)'>
           <input type='hidden' name='_token' value='".csrf_token()."'>
           <input name='_method' type='hidden' value='DELETE'>
           <button class='btn btn-xs btn-outline-danger' type='submit'><i class='fa fa-trash'></i></button>
           </form>
-          <a href='".route('admin.teacher.resetPassword',$post->getTeacherBatch->id)."' class='btn btn-xs btn-outline-success' data-toggle='tooltip' data-placement='top' title='Reset Password'><i class='fa fa-key'></i></a>
-          <a href='".route('admin.teacher.cardPrint',$post->getTeacherBatch->id)."' class='btn btn-xs btn-outline-info' data-toggle='tooltip' data-placement='top' title='Print Card'><i class='fa fa-print'></i></a>
+          <a href='".route('admin.teacher.resetPassword',$post->id)."' class='btn btn-xs btn-outline-success' data-toggle='tooltip' data-placement='top' title='Reset Password'><i class='fa fa-key'></i></a>
+          <a href='".route('admin.teacher.cardPrint',$post->id)."' class='btn btn-xs btn-outline-info' data-toggle='tooltip' data-placement='top' title='Print Card'><i class='fa fa-print'></i></a>
           </div>
           ";
            // $nestedData['count'] = $post->getClassCount->count();
