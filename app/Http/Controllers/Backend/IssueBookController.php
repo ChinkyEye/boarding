@@ -70,6 +70,7 @@ class IssueBookController extends Controller
                             ->where('is_active','1')
                             ->with('getStudentUser')
                             ->get();
+                            // dd($student_list);
       return Response::json($student_list);
     }   
 
@@ -88,7 +89,12 @@ class IssueBookController extends Controller
       $bookQuantity = Book::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->where('id',$request['book_id'])->value('quantity');
       // dd($bookQuantity,$selectBookCount);
      
-        $user_id = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->where('id', $request->student_id)->value('user_id');
+        // $user_id = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->where('id', $request->student_id)->value('user_id');
+       $user_id = Student::whereHas('getStudentViaBatch', function(Builder $query){
+                                    $query->where('batch_id', Auth::user()->batch_id);
+                                })->where('school_id', Auth::user()->school_id)
+                                  ->where('id', $request->student_id)
+                                  ->value('user_id');
         $this->validate($request, [
             'shift_id' => 'required',
             'class_id' => 'required',
@@ -187,8 +193,10 @@ class IssueBookController extends Controller
     {
       $issuebooks = IssueBook::find($id);
       $books = Book::where('school_id',Auth::user()->school_id)->where('batch_id',Auth::user()->batch_id)->where('class_id', $issuebooks->class_id)->get(); 
-      $students = Student::where('school_id',Auth::user()->school_id)
-                          ->where('batch_id',Auth::user()->batch_id)
+      $students = Student::whereHas('getStudentViaBatch', function(Builder $query){
+                                    $query->where('batch_id', Auth::user()->batch_id);
+                        })->where('school_id',Auth::user()->school_id)
+                          // ->where('batch_id',Auth::user()->batch_id)
                           ->where('shift_id', $issuebooks->shift_id)
                           ->where('class_id', $issuebooks->class_id)
                           ->where('section_id', $issuebooks->section_id)

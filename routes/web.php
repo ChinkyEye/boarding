@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+// Route::post('/base','Controller@getAll')->name('base');
 Auth::routes();
 // Route::group(['middleware' => ['admin']], function(){
 // 	Route::get('/try', 'Backend\NoticeForController@index');

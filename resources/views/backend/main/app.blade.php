@@ -225,6 +225,33 @@
       sessionStorage.setItem("SelItem", selVal);
     });
   </script>
+  {{-- <script type="text/javascript">
+    $('#batch_data').change(function(){
+    // $("body").on("change","#batch_data", function(event){
+      var batch_id = $('#batch_data').val();
+      var url = "{{ route('base')}}";
+      var token = $('meta[name="csrf-token"]').attr('content');
+      // alert("lol");
+      // debugger;
+      $.ajax({
+        type:"POST",
+        dataType:"JSON",
+        url:url,
+        data:{
+          _token: token,
+          batch_id : batch_id,
+        },
+        success:function(e){
+          console.log(e)
+            // toastr.success(e.msg);
+          },
+          error: function (e) {
+            toastr.error('Sorry! this data is used some where');
+            Pace.stop();
+          }
+        });
+    });
+  </script> --}}
   @stack('javascript')
 </body>
 </html>
