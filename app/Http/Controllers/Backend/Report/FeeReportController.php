@@ -20,6 +20,7 @@ class FeeReportController extends Controller
      */
     public function index()
     {
+        // dd("bitch");
         $shifts = Shift::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)
                         ->where('is_active', True)
                         ->orderBy('sort_id','ASC')
