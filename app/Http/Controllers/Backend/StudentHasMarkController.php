@@ -148,9 +148,13 @@ class StudentHasMarkController extends Controller
 
     public function main($slug,$exam)
     {
+      // dd('k');
       $student_id = Student::where('slug',$slug)
                             ->where('school_id', Auth::user()->school_id)
-                            ->where('batch_id', Auth::user()->batch_id) 
+                            ->whereHas('getStudentViaBatch', function(Builder $query){
+                               $query->where('batch_id', Auth::user()->batch_id);
+                              })
+                            // ->where('batch_id', Auth::user()->batch_id) 
                             ->where('is_active', True)
                             ->value('id');
       $student_info = Student::with('getStudentUser')->find($student_id);
@@ -189,10 +193,18 @@ class StudentHasMarkController extends Controller
 
     public function marksheet($slug,$exam)
     {
+      // dd('ok');
       $settings =Setting::where('id', Auth::user()->school_id)->get();
       // dd($settings);
-      $student_id = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->where('slug',$slug)->value('user_id'); 
+      $student_id = Student::where('school_id', Auth::user()->school_id)
+                           // ->whereHas('getStudentViaBatch', function(Builder $query){
+                           //      $query->where('batch_id', Auth::user()->batch_id);
+                           //  })
+                            // ->where('batch_id', Auth::user()->batch_id)
+                            ->where('slug',$slug)
+                            ->value('user_id'); 
       $db_student = User::find($student_id);
+      // dd($db_student);
 
       $exam_id = Exam::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->where('slug', $exam)->value('id');
       $db_exam = Exam::find($exam_id);

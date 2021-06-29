@@ -66,20 +66,24 @@
 @push('javascript')
 <script src="{{URL::to('/')}}/backend/js/jquery.validate.js"></script>
 <script type="text/javascript" src="{{URL::to('/')}}/backend/js/nepali.datepicker.v2.2.min.js"></script>
-<script>
+<script type="text/javascript">
+$(document).ready(function(){
+  var currentDate = NepaliFunctions.ConvertDateFormat(NepaliFunctions.GetCurrentBsDate(), "YYYY-MM-DD");
+  $('#start_date').val(currentDate);
+  $('#end_date').val(currentDate);
   $('#start_date').nepaliDatePicker({
-    npdMonth: true,
-    npdYear: true,
-    npdYearCount: 10
-  });
-</script>
-<script>
+    ndpYear: true,
+    ndpMonth: true,
+    disableAfter: currentDate,
+    });
   $('#end_date').nepaliDatePicker({
-    npdMonth: true,
-    npdYear: true,
-    npdYearCount: 10
+    ndpYear: true,
+    ndpMonth: true,
+    ndpYearCount: 10,
+    });
   });
 </script>
+
 <script>
 $().ready(function() {
   $("#signup").validate({

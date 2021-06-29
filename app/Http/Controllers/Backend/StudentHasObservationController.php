@@ -40,10 +40,22 @@ class StudentHasObservationController extends Controller
 
     public function mark($user_slug,$exam_slug)
     {
-        $user_id = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->where('slug',$user_slug)->value('user_id');
+        $user_id = Student::where('school_id', Auth::user()->school_id)
+                          ->whereHas('getStudentViaBatch', function(Builder $query){
+                             $query->where('batch_id', Auth::user()->batch_id);
+                            })
+                          // ->where('batch_id', Auth::user()->batch_id)
+                          ->where('slug',$user_slug)
+                          ->value('user_id');
         $student_id = $user_id;
         $db_student = User::find($user_id);
-        $value = Student::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->where('slug',$user_slug)->value('id');
+        $value = Student::where('school_id', Auth::user()->school_id)
+                        ->whereHas('getStudentViaBatch', function(Builder $query){
+                           $query->where('batch_id', Auth::user()->batch_id);
+                         })
+                         // ->where('batch_id', Auth::user()->batch_id)
+                         ->where('slug',$user_slug)
+                         ->value('id');
         $student_findid = Student::find($value);
 
         $exam_id = Exam::where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id)->where('slug', $exam_slug)->value('id');
