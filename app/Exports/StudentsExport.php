@@ -28,12 +28,13 @@ class StudentsExport implements FromQuery,WithStyles, WithHeadings, WithMapping,
     */
      use Exportable;
 
-    protected $excShift,$excClass,$excSection;
+    protected $excShift,$excClass,$excSection,$excBatch;
 
-     function __construct($excShift,$excClass,$excSection) {
+     function __construct($excShift,$excClass,$excSection,$excBatch) {
             $this->shift = $excShift;
             $this->class = $excClass;
             $this->section = $excSection;
+            $this->excBatch = $excBatch;
             // if($this->shift){
             //     $this->shift_name = Shift::find($this->shift)->value('name');
             // }else{
@@ -55,7 +56,7 @@ class StudentsExport implements FromQuery,WithStyles, WithHeadings, WithMapping,
      {
         // $student = Student::query()->where('school_id', Auth::user()->school_id)->where('batch_id', Auth::user()->batch_id);
         $student = Student::whereHas('getStudentViaBatch', function(Builder $query){
-            $query->where('batch_id', Auth::user()->batch_id);
+            $query->where('batch_id', $this->excBatch);
         })->where('school_id', Auth::user()->school_id);
 
         if($this->shift != NULL){

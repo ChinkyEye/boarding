@@ -19,7 +19,6 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-
     public function __construct(Request $request, Helper $helper, Guard $auth)
     {
       $this->request = $request;
@@ -45,8 +44,5 @@ class Controller extends BaseController
         $batchs = Batch::all();
         return ['batch' => $batchs];
     }
-
-    // public function getAll(Request $request){
-    //     dd("bitch");
-    // }
+   
 }

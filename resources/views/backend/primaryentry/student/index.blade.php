@@ -29,6 +29,7 @@
           <input type="hidden" id="idcardShift" name="excShift">
           <input type="hidden" id="idcardClass" name="excClass">
           <input type="hidden" id="idcardSection" name="excSection">
+          <input type="hidden" id="idcardBatchh" name="excBatchh">
           <input type="submit" name="submit" value="Export" class="btn btn-sm btn-info">
         </form>
         <form action="{{route('admin.student.idcard')}}" method="GET" class="d-inline-block">
@@ -42,7 +43,7 @@
           <input type="hidden" id="idcardShift" name="idcardShift">
           <input type="hidden" id="idcardClass" name="idcardClass">
           <input type="hidden" id="idcardSection" name="idcardSection">
-          <input type="hidden" id="idcardBatch" name="idcardBatch">
+          <input type="hidden" id="idcertificateBatch" name="certificateBatch">
           <input type="submit" name="submit" value="Certificate" class="btn btn-sm btn-info">
         </form>
         {{-- <a href="{{route('admin.student.upgrade')}}" class="btn btn-sm btn-info text-capitalize">upgrade batch</a> --}}
@@ -172,6 +173,10 @@
   $("body").on("change","#batch_data", function(event){
     var batch_id = $('#batch_data').val();
     $("#idcardBatch").val(batch_id);
+    $("#idcertificateBatch").val(batch_id);
+    $("#idcardBatchh").val(batch_id);
+
+
   });
 </script>
 <script type="text/javascript">

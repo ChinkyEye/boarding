@@ -48,11 +48,16 @@ class StudentController extends Controller
 
   public function export(Request $request)
   {
+    $common_batch = $this->getAll($request);
+    dd($common_batch);
+    // $common_batch = $this->getAll($request)['batch_value'];
+    // $common_batch =$this->batchCheck($request)['batch'];
     $excShift = $request->excShift;
     $excClass = $request->excClass;
     $excSection = $request->excSection;
+    $excBatch = $request->excBatchh;
     $date = $this->helper->date_np_con_parm(date('Y-m-d'));
-    return Excel::download(new StudentsExport($excShift,$excClass,$excSection), $date.'Student.xlsx');
+    return Excel::download(new StudentsExport($excShift,$excClass,$excSection,$excBatch), $date.'Student.xlsx');
   }
 
   public  function checkemail(Request $request)
@@ -130,7 +135,7 @@ class StudentController extends Controller
     $idcardShift = $request->idcardShift;
     $idcardClass = $request->idcardClass;
     $idcardSection = $request->idcardSection;
-    $idcardBatch = $request->idcardBatch;
+    $idcardBatch = $request->certificateBatch;
     // dd($idcardBatch);
     if(!empty($idcardBatch)){
       $students = Student::whereHas('getStudentViaBatch', function(Builder $query) use ($idcardBatch){
