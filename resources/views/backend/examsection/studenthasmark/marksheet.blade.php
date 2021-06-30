@@ -33,7 +33,7 @@
           <span class="px-4 py-2 bg-primary rounded h5 font-weight-bold">MARK-SHEET</span>
           <div class="text-capitalize mt-3">
             <u class="h5 font-weight-bold">{{$db_exam->name}}</u>
-            <span class="position-absolute mr-4" style="right: 0;"><b>Academic Year:</b> {{$db_student->getUserStudent->getBatch->name}}</span>
+            <span class="position-absolute mr-4" style="right: 0;"><b>Academic Year:</b> {{$db_student->getUserStudent->getStudentViaBatch->Batch->name}}</span>
           </div>
         </div>
         <table class="table table-borderless table-hover table-sm">
