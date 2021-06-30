@@ -57,6 +57,7 @@ class StudentHasMarkController extends Controller
                             // ->where('batch_id', Auth::user()->batch_id) 
                             ->where('is_active', True)
                             ->value('id');
+                            // dd($student_id);
 
       $student_info = Student::with('getStudentUser')->find($student_id);
       $class_id = $student_info->class_id;
@@ -213,6 +214,7 @@ class StudentHasMarkController extends Controller
      */
     public function store(Request $request)
     {
+      // dd('bitch');
       $classexam_id = $request->classexam_id;
       // dd($classexam_id);
       $student_id = $request->student_id;
@@ -254,12 +256,14 @@ class StudentHasMarkController extends Controller
         $studenthasobservationmark= StudentHasObservation::create([
             'student_id' => $user_id,
             'invoicemark_id' => $calc_bill_id,
+            'exam_id' => $exam_id,
             'school_id' => Auth::user()->school_id,
             'batch_id' => Auth::user()->batch_id,
             'created_by' => Auth::user()->id,
             'created_at_np' => $this->helper->date_np_con()." ".date("H:i:s"),
 
         ]);
+      // dd($studenthasobservationmark);
        
         // return redirect()->route('teacher.observation.mark',['user_id' => $slug,'classexam_id' => $exam]);
       }

@@ -280,6 +280,7 @@ class LedgerController extends Controller
                 $studenthasobservationmark= StudentHasObservation::create([
                                             'student_id' => $user,
                                             'invoicemark_id' => $calc_bill_id.$key,
+                                            'exam_id' => $exam_id,
                                             'school_id' => Auth::user()->school_id,
                                             'batch_id' => Auth::user()->batch_id,
                                             'created_by' => Auth::user()->id,
